@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Dashboard Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a3e 100%);
+            color: #e0e0e0;
+        }
+        .app {
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #1a1a3e 0%, #2d2d5f 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border-bottom: 2px solid #00ff88;
+        }
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(90deg, #00ff88 0%, #00cccc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header p {
+            color: #aaa;
+            margin-top: 5px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #e0e0e0;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .tab-btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+        }
+        .tab-btn.active {
+            background: rgba(0, 255, 136, 0.3);
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        .content {
+            background: rgba(20, 20, 40, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+        .content h2 {
+            color: #00ff88;
+            margin-bottom: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 204, 204, 0.1) 100%);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .card h3 {
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+        .price {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fff;
+            margin: 10px 0;
+        }
+        .positive {
+            color: #00ff88;
+        }
+        .negative {
+            color: #ff4444;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #aaa;
+        }
+        .error {
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            color: #ff4444;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .news-card {
+            background: rgba(0, 255, 136, 0.08);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .news-card h4 {
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .news-card p {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        .news-card a {
+            color: #00ff88;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="header">
+            <h1>📊 Financial Dashboard Hub</h1>
+            <p>Real-time Market Data | News | Alerts</p>
+        </div>
+
+        <div class="container">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('india')">🇮🇳 India Market</button>
+                <button class="tab-btn" onclick="showTab('us')">🇺🇸 US Market</button>
+                <button class="tab-btn" onclick="showTab('crypto')">₿ Crypto</button>
+                <button class="tab-btn" onclick="showTab('news')">📰 News</button>
+            </div>
+
+            <div class="content">
+                <div id="india" class="tab-content">
+                    <h2>🇮🇳 Indian Stock Market</h2>
+                    <div id="india-data" class="loading">Loading...</div>
+                </div>
+
+                <div id="us" class="tab-content" style="display:none;">
+                    <h2>🇺🇸 US Stock Market</h2>
+                    <div id="us-data" class="loading">Loading...</div>
+                </div>
+
+                <div id="crypto" class="tab-content" style="display:none;">
+                    <h2>₿ Cryptocurrency</h2>
+                    <div id="crypto-data" class="loading">Loading...</div>
+                </div>
+
+                <div id="news" class="tab-content" style="display:none;">
+                    <h2>📰 News</h2>
+                    <div id="news-data" class="loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+        async function loadIndiaMarket() {
+            try {
+                const res = await fetch(`${API_URL}/api/stocks/india`);
+                const data = await res.json();
+                const nifty = data.nifty50;
+                document.getElementById('india-data').innerHTML = `
+                    <div class="grid">
+                        <div class="card">
+                            <h3>NIFTY 50</h3>
+                            <p class="price">₹${nifty.c?.toFixed(2)}</p>
+                            <p class="${nifty.d >= 0 ? 'positive' : 'negative'}">
+                                ${nifty.d >= 0 ? '↑' : '↓'} ${Math.abs(nifty.d)?.toFixed(2)} (${nifty.dp?.toFixed(2)}%)
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('india-data').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadUSMarket() {
+            try {
+                const res = await fetch(`${API_URL}/api/stocks/us`);
+                const data = await res.json();
+                const { sp500, nasdaq, dow } = data;
+                document.getElementById('us-data').innerHTML = `
+                    <div class="grid">
+                        <div class="card">
+                            <h3>S&P 500</h3>
+                            <p class="price">$${sp500.c?.toFixed(2)}</p>
+                            <p class="${sp500.d >= 0 ? 'positive' : 'negative'}">
+                                ${sp500.d >= 0 ? '↑' : '↓'} ${Math.abs(sp500.d)?.toFixed(2)}
+                            </p>
+                        </div>
+                        <div class="card">
+                            <h3>NASDAQ</h3>
+                            <p class="price">$${nasdaq.c?.toFixed(2)}</p>
+                            <p class="${nasdaq.d >= 0 ? 'positive' : 'negative'}">
+                                ${nasdaq.d >= 0 ? '↑' : '↓'} ${Math.abs(nasdaq.d)?.toFixed(2)}
+                            </p>
+                        </div>
+                        <div class="card">
+                            <h3>DOW JONES</h3>
+                            <p class="price">$${dow.c?.toFixed(2)}</p>
+                            <p class="${dow.d >= 0 ? 'positive' : 'negative'}">
+                                ${dow.d >= 0 ? '↑' : '↓'} ${Math.abs(dow.d)?.toFixed(2)}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('us-data').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadCrypto() {
+            try {
+                const res = await fetch(`${API_URL}/api/crypto/list`);
+                const cryptos = await res.json();
+                let html = '<div class="grid">';
+                cryptos.slice(0, 12).forEach(crypto => {
+                    html += `
+                        <div class="card">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                <img src="${crypto.image}" alt="${crypto.name}" style="width:40px; height:40px; border-radius:50%;">
+                                <div>
+                                    <h3 style="margin:0;">${crypto.name}</h3>
+                                    <p style="color:#888; margin:0; font-size:0.85rem;">${crypto.symbol.toUpperCase()}</p>
+                                </div>
+                            </div>
+                            <p class="price">$${crypto.current_price?.toLocaleString()}</p>
+                            <p class="${crypto.price_change_percentage_24h >= 0 ? 'positive' : 'negative'}">
+                                ${crypto.price_change_percentage_24h >= 0 ? '↑' : '↓'} ${crypto.price_change_percentage_24h?.toFixed(2)}%
+                            </p>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                document.getElementById('crypto-data').innerHTML = html;
+            } catch (error) {
+                document.getElementById('crypto-data').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadNews() {
+            try {
+                const res = await fetch(`${API_URL}/api/news/market`);
+                const articles = await res.json();
+                let html = '<div class="news-grid">';
+                articles.slice(0, 10).forEach(article => {
+                    html += `
+                        <div class="news-card">
+                            ${article.urlToImage ? `<img src="${article.urlToImage}" style="width:100%; height:150px; object-fit:cover; border-radius:8px; margin-bottom:10px;">` : ''}
+                            <h4>${article.title}</h4>
+                            <p>${article.description?.substring(0, 80)}...</p>
+                            <a href="${article.url}" target="_blank">Read More →</a>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                document.getElementById('news-data').innerHTML = html;
+            } catch (error) {
+                document.getElementById('news-data').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.getElementById(tabName).style.display = 'block';
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tabName === 'india') loadIndiaMarket();
+            if (tabName === 'us') loadUSMarket();
+            if (tabName === 'crypto') loadCrypto();
+            if (tabName === 'news') loadNews();
+        }
+
+        // Load initial data
+        loadIndiaMarket();
+    </script>
+</body>
+</html>
